@@ -1,18 +1,19 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
-import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
-import { Rnd } from 'react-rnd';
+import VideoCallWindow from './VideoCallWindow';
+import '../stylings/RoomPage.css';
 
 function RoomPage() {
     const { roomId } = useParams();
     const [id, setId] = useState("no");
     const [content, setContent] = useState("");
     const [language, setLanguage] = useState("javascript");
+    const [editorWidth, setEditorWidth] = useState("50vw"); // Start with 50% width
+    const resizerRef = useRef(null);
 
     // Establish a socket connection
-
     const socket = useMemo(() => io(import.meta.env.VITE_BACKEND_URL), []);
 
     useEffect(() => {
@@ -56,30 +57,28 @@ function RoomPage() {
         });
     };
 
-    // Function to initialize video call with ZegoUIKitPrebuilt
-    const myMeeting = async (element) => {
-        const appId = Number(import.meta.env.VITE_APP_ID);
-        const serverSecret = import.meta.env.VITE_SERVER_SECRET;
-        const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-            appId,
-            serverSecret,
-            roomId,
-            Date.now().toString(),
-            "UserName123"
-        );
-        const zp = ZegoUIKitPrebuilt.create(kitToken);
+    // Handle resizing with mouse
+    const handleMouseDown = (e) => {
+        e.preventDefault();
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
+    };
 
-        zp.joinRoom({
-            container: element,
-            scenario: { mode: ZegoUIKitPrebuilt.VideoConference },
-        });
+    const handleMouseMove = (e) => {
+        const newWidth = e.clientX;
+        setEditorWidth(`${newWidth}px`);
+    };
+
+    const handleMouseUp = () => {
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
     };
 
     return (
         <div className="room-page">
-            <h1>Room ID: {roomId}</h1>
-            <div style={{ marginBottom: "10px" }}>
-                <select onChange={handleLanguageChange} value={language} style={{ marginRight: "10px" }}>
+            <header className="header">
+                <h1>Room: {roomId}</h1>
+                <select className="editor-settings" onChange={handleLanguageChange} value={language}>
                     <option value="javascript">JavaScript</option>
                     <option value="typescript">TypeScript</option>
                     <option value="python">Python</option>
@@ -88,28 +87,26 @@ function RoomPage() {
                     <option value="html">HTML</option>
                     <option value="css">CSS</option>
                 </select>
-            </div>
-            <Editor
-                height="300px"
-                width="100%"
-                language={language}
-                theme="vs-dark"
-                value={content}
-                onChange={handleEditorChange}
-                onMount={editorDidMount}
-            />
-            <Rnd
-                default={{ x: 100, y: 100, width: 600, height: 400 }}
-                minWidth={300}
-                minHeight={200}
-                bounds="window"
-                className="drag-resize-container"
-            >
+                <span>Connected as ID: {id}</span>
+            </header>
+            <div className="editor-container">
+                <div className="resizable-editor" style={{ width: editorWidth }}>
+                    <Editor
+                        height="100%"
+                        language={language}
+                        theme="vs-dark"
+                        value={content}
+                        onChange={handleEditorChange}
+                        onMount={editorDidMount}
+                    />
+                </div>
                 <div
-                    ref={myMeeting}
-                    style={{ width: "100%", height: "100%", backgroundColor: "#f0f0f0" }}
+                    ref={resizerRef}
+                    className="resizer"
+                    onMouseDown={handleMouseDown}
                 />
-            </Rnd>
+            </div>
+            <VideoCallWindow />
         </div>
     );
 }
