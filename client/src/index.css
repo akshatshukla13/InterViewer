@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+#ZegoRoomLeaveButton {
+    display: none !important;        /* Completely hides the button */
+    pointer-events: none !important; /* Prevents any interaction */
+    opacity: 0 !important;           /* Makes it fully transparent if shown */
+    visibility: hidden !important;   /* Makes it invisible */
+  }
+  

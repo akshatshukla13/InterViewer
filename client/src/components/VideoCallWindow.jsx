@@ -1,9 +1,9 @@
 import React from "react";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { useParams } from "react-router-dom";
-import { Rnd } from "react-rnd";
-import '../index.css'
-function VideoCallWindow() {
+import '../index.css';
+
+function VideoCallWindow({ isFullscreen }) {
   const { roomId } = useParams();
 
   const myMeeting = async (element) => {
@@ -16,41 +16,33 @@ function VideoCallWindow() {
       Date.now().toString(),
       "UserName123"
     );
+
     const zp = ZegoUIKitPrebuilt.create(kitToken);
 
     zp.joinRoom({
       container: element,
       scenario: { mode: ZegoUIKitPrebuilt.VideoConference },
+      showPreJoinView: false,
+      showTextChat: false,
+      showScreenSharingButton: true,
+      layout: "Sidebar",
+      showLeavingView: false,
+      showLeaveRoomConfirmDialog: false,
     });
   };
 
   return (
-    <Rnd
-      default={{
-        x: window.innerWidth - 670,  
-        y: 0,  
-        width: 320, 
-        height: 200,  
-      }}
-      minWidth={300}  
-      minHeight={200}  
-      bounds="window"  
-      className="drag-resize-container"
+    <div
+      ref={myMeeting}
       style={{
-        border: "2px solid #ae7aff",
-        borderRadius: "8px",
+        width: isFullscreen ? "100%" : "650px",
+        height: isFullscreen ? "95%" : "400px",
+        backgroundColor: "#f0f0f0",
+        border: "1px solid rgb(104, 55, 184)",
+        borderRadius: "10px",
+        margin: isFullscreen ? "0" : "0 auto",
       }}
-    >
-      <div
-        ref={myMeeting}
-        style={{
-          width: "100%",
-          height: "100%",
-          backgroundColor: "#f0f0f0",
-          borderRadius: "8px",
-        }}
-      />
-    </Rnd>
+    />
   );
 }
 
