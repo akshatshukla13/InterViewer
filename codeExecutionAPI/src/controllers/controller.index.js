@@ -21,7 +21,13 @@ async function executeCode(req, res) {
         javascript: 63,
         python: 71,
         java: 62,
-        cpp: 54
+        cpp: 54,
+        c: 50,
+        ruby: 72,
+        go: 60,
+        php: 68,
+        swift: 83,
+        kotlin: 78
     };
     
     const languageId = languageMap[language];
@@ -36,7 +42,7 @@ async function executeCode(req, res) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-RapidAPI-Key': process.env.RAPID_API_KEY_JUDGE0,  // Replace with your API key
+                'X-RapidAPI-Key': process.env.RAPID_API_KEY_JUDGE0,  
                 'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
             },
             body: JSON.stringify({
